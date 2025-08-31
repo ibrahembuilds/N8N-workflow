@@ -35,8 +35,8 @@
       "name": "DeepSeek Chat Model",
       "credentials": {
         "deepSeekApi": {
-          "id": "55uAN414yMd8vcy0",
-          "name": "DeepSeek account"
+          "id": "UZCZDjblOMt1nVYr",
+          "name": "DeepSeek account 2"
         }
       }
     },
@@ -49,14 +49,15 @@
         160
       ],
       "id": "10a92bf2-9fe3-494c-9c08-82d51c9481bc",
-      "name": "Simple Memory"
+      "name": "Simple Memory",
+      "disabled": true
     },
     {
       "parameters": {
         "promptType": "define",
         "text": "={{ $json.chatInput }}",
         "options": {
-          "systemMessage": "You represent a Computer company. Please answer customer inquiries using the information provided in the Google Sheet. Please send an email to the owner only if the customer requests to purchase a device. Before sending the email, ask the customer for their name and phone number, and send them to the owner via Email."
+          "systemMessage": "You represent a Computer company. Please answer customer inquiries using the information provided in the Google doce. Please send an email to the owner only if the customer requests to purchase a device. Before sending the email, ask the customer for their name and phone number, and send them to the owner via Email."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -83,30 +84,6 @@
       "id": "feb1cf40-3848-47fd-9a75-b847f771665d",
       "name": "When chat message received",
       "webhookId": "3baa62af-00bf-4da9-abaa-60293acdd846"
-    },
-    {
-      "parameters": {
-        "sendTo": "ah7366406@gmail.com",
-        "subject": "={{ $fromAI('Subject', ``, 'string') }}",
-        "emailType": "text",
-        "message": "=",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.gmailTool",
-      "typeVersion": 2.1,
-      "position": [
-        880,
-        96
-      ],
-      "id": "28248197-468a-4fd0-b057-8cdc1e19fa76",
-      "name": "Send a message in Gmail",
-      "webhookId": "218bed10-e904-460a-8b67-e7c72d6a3151",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "IYVBI6ewRftmZj8p",
-          "name": "Gmail account"
-        }
-      }
     }
   ],
   "pinData": {},
@@ -154,24 +131,13 @@
           }
         ]
       ]
-    },
-    "Send a message in Gmail": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "dcea2164-a553-4360-a534-21ab0b9f2aa5",
+  "versionId": "9f532673-2323-4044-bfee-f449613fa233",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "00577416dd576e67c6e8cd65d7a07ebf1960708e86ceaff72931c4fd6b46ff38"
