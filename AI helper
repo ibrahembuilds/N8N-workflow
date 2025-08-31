@@ -1,0 +1,181 @@
+{
+  "name": "hemo yt ai",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "https://docs.google.com/document/d/1b8WWTgNeRXIpg7aj2zVgiyBpyikkE7byC3hmmirTjOY/edit?tab=t.0"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        608,
+        192
+      ],
+      "id": "fde46d88-d57e-40b0-b57d-3e2afd9b12b7",
+      "name": "Get a document in Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "1pwW4yR6b2GEpIsk",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        272,
+        112
+      ],
+      "id": "8a8cea01-ea28-48fe-b43c-37b016849bca",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "55uAN414yMd8vcy0",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        496,
+        160
+      ],
+      "id": "10a92bf2-9fe3-494c-9c08-82d51c9481bc",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You represent a Computer company. Please answer customer inquiries using the information provided in the Google Sheet. Please send an email to the owner only if the customer requests to purchase a device. Before sending the email, ask the customer for their name and phone number, and send them to the owner via Email."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -64
+      ],
+      "id": "1df53f77-f761-469f-b8b4-517fe7b63519",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is hemo . How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        96,
+        -64
+      ],
+      "id": "feb1cf40-3848-47fd-9a75-b847f771665d",
+      "name": "When chat message received",
+      "webhookId": "3baa62af-00bf-4da9-abaa-60293acdd846"
+    },
+    {
+      "parameters": {
+        "sendTo": "ah7366406@gmail.com",
+        "subject": "={{ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        96
+      ],
+      "id": "28248197-468a-4fd0-b057-8cdc1e19fa76",
+      "name": "Send a message in Gmail",
+      "webhookId": "218bed10-e904-460a-8b67-e7c72d6a3151",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "IYVBI6ewRftmZj8p",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get a document in Google Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dcea2164-a553-4360-a534-21ab0b9f2aa5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "00577416dd576e67c6e8cd65d7a07ebf1960708e86ceaff72931c4fd6b46ff38"
+  },
+  "id": "qUSVcRqtJywway97",
+  "tags": []
+}
