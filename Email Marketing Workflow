@@ -1,0 +1,360 @@
+{
+  "name": "Email Marketing Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "AI Email Newsletter Subscription",
+        "formDescription": "Subscribe to receive AI-generated personalized emails on topics you care about. Fill in your details below and choose how often you want to receive them.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "Your full name"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true,
+              "placeholder": "your@email.com"
+            },
+            {
+              "fieldLabel": "Topics",
+              "fieldType": "textarea",
+              "requiredField": true,
+              "placeholder": "e.g. AI news, marketing tips, tech trends, productivity hacks, health & fitness..."
+            },
+            {
+              "fieldLabel": "Frequency",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  { "option": "Daily" },
+                  { "option": "Weekly" }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "respondWith": "text",
+          "responseText": "You are subscribed! Your first AI-generated newsletter will arrive soon. Check your inbox!"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [-200, 0],
+      "id": "a1b2c3d4-0001-0001-0001-000000000001",
+      "name": "Subscription Form",
+      "webhookId": "email-marketing-sub-form-001"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "id",
+          "cachedResultName": "Subscribers"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.Name }}",
+            "Email": "={{ $json.Email }}",
+            "Topics": "={{ $json.Topics }}",
+            "Frequency": "={{ $json.Frequency }}",
+            "Subscribed At": "={{ $now.toISO() }}",
+            "Active": "TRUE"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [80, 0],
+      "id": "a1b2c3d4-0002-0002-0002-000000000002",
+      "name": "Save Subscriber to Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "Welcome! Your AI Newsletter is Set Up",
+        "emailType": "html",
+        "message": "=<html><body style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;\">\n<h2 style=\"color: #4A90D9;\">Welcome, {{ $json.Name }}!</h2>\n<p>You have successfully subscribed to your personalized AI-generated newsletter.</p>\n<table style=\"background: #f9f9f9; padding: 15px; border-radius: 8px; width: 100%;\">\n  <tr><td><strong>Topics:</strong></td><td>{{ $json.Topics }}</td></tr>\n  <tr><td><strong>Frequency:</strong></td><td>{{ $json.Frequency }}</td></tr>\n</table>\n<p style=\"margin-top: 20px;\">Your first newsletter will arrive based on your chosen frequency. Our AI will craft a personalized email just for you covering the topics you care about.</p>\n<p>Stay curious!</p>\n<hr style=\"border: none; border-top: 1px solid #eee; margin: 20px 0;\">\n<p style=\"font-size: 12px; color: #999;\">You can unsubscribe at any time by replying to any newsletter email.</p>\n</body></html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [360, 0],
+      "id": "a1b2c3d4-0003-0003-0003-000000000003",
+      "name": "Send Welcome Email",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-200, 360],
+      "id": "a1b2c3d4-0004-0004-0004-000000000004",
+      "name": "Daily 9AM Schedule"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "id",
+          "cachedResultName": "Subscribers"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [80, 360],
+      "id": "a1b2c3d4-0005-0005-0005-000000000005",
+      "name": "Get All Subscribers",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [360, 360],
+      "id": "a1b2c3d4-0006-0006-0006-000000000006",
+      "name": "Loop Over Subscribers"
+    },
+    {
+      "parameters": {
+        "jsCode": "const subscriber = $input.item.json;\nconst today = new Date();\nconst dayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday\nconst frequency = subscriber.Frequency || 'Daily';\nconst isActive = String(subscriber.Active).toUpperCase() === 'TRUE';\n\nif (!isActive) {\n  return [];\n}\n\n// Daily: send every day\n// Weekly: send every Monday (dayOfWeek === 1)\nif (frequency === 'Daily' || (frequency === 'Weekly' && dayOfWeek === 1)) {\n  return [{ json: subscriber }];\n}\n\nreturn [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [620, 360],
+      "id": "a1b2c3d4-0007-0007-0007-000000000007",
+      "name": "Check Send Frequency"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [880, 500],
+      "id": "a1b2c3d4-0008-0008-0008-000000000008",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "UZCZDjblOMt1nVYr",
+          "name": "DeepSeek account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert newsletter writer. Write a high-quality, engaging newsletter email for a subscriber.\n\nSubscriber Name: {{ $json.Name }}\nTopics of Interest: {{ $json.Topics }}\nEmail Frequency: {{ $json.Frequency }}\nToday's Date: {{ $now.format('dddd, MMMM D, YYYY') }}\n\nInstructions:\n1. First line must be: SUBJECT: [write a compelling, personalized subject line here]\n2. Then a blank line.\n3. Then write: BODY: \n4. Then write the full HTML email body.\n\nEmail requirements:\n- Address the subscriber by their first name\n- Provide 2-3 valuable, practical insights or tips on their topics\n- Include relevant news or trends if applicable\n- Keep it concise but informative (400-600 words in the body)\n- Use a warm, friendly and professional tone\n- Format with simple HTML (h2, p, ul, li tags are fine)\n- End with an encouraging closing message\n- Do NOT include unsubscribe links or footer boilerplate\n\nWrite the email now:"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [880, 360],
+      "id": "a1b2c3d4-0009-0009-0009-000000000009",
+      "name": "Generate Newsletter Email"
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiOutput = $input.item.json.text || '';\n\n// Extract SUBJECT line\nconst subjectMatch = aiOutput.match(/^SUBJECT:\\s*(.+?)(?:\\r?\\n|$)/im);\nconst subject = subjectMatch ? subjectMatch[1].trim() : 'Your Personalized Newsletter';\n\n// Extract BODY section\nconst bodyMatch = aiOutput.match(/BODY:\\s*([\\s\\S]+)/i);\nlet body = bodyMatch ? bodyMatch[1].trim() : aiOutput;\n\n// Wrap plain text in a styled HTML container if not already HTML\nif (!body.toLowerCase().includes('<html>')) {\n  body = `<html><body style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6;\">\n${body}\n<hr style=\"border: none; border-top: 1px solid #eee; margin: 30px 0;\">\n<p style=\"font-size: 12px; color: #999;\">You are receiving this because you subscribed to a personalized newsletter. Reply to unsubscribe.</p>\n</body></html>`;\n}\n\n// Get subscriber info from earlier node\nconst subscriber = $('Check Send Frequency').item.json;\n\nreturn [{\n  json: {\n    subscriberEmail: subscriber.Email,\n    subscriberName: subscriber.Name,\n    subject: subject,\n    body: body\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1140, 360],
+      "id": "a1b2c3d4-0010-0010-0010-000000000010",
+      "name": "Parse AI Response"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.subscriberEmail }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1400, 360],
+      "id": "a1b2c3d4-0011-0011-0011-000000000011",
+      "name": "Send Newsletter Email",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Subscription Form": {
+      "main": [
+        [
+          {
+            "node": "Save Subscriber to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Subscriber to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 9AM Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get All Subscribers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Subscribers": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Subscribers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Subscribers": {
+      "main": [
+        [
+          {
+            "node": "Check Send Frequency",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Check Send Frequency": {
+      "main": [
+        [
+          {
+            "node": "Generate Newsletter Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Newsletter Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Newsletter Email": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "Send Newsletter Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Newsletter Email": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Subscribers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "00577416dd576e67c6e8cd65d7a07ebf1960708e86ceaff72931c4fd6b46ff38"
+  },
+  "id": "email-marketing-workflow-001",
+  "tags": []
+}
